@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Animation/AnimSequence.h"
 
 
 AFPSCharacter::AFPSCharacter()
