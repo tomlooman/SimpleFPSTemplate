@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Animation/AnimSequence.h"
 
 
 AFPSCharacter::AFPSCharacter()
@@ -13,15 +14,15 @@ AFPSCharacter::AFPSCharacter()
 	// Create a CameraComponent	
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
 	CameraComponent->SetupAttachment(GetCapsuleComponent());
-	CameraComponent->RelativeLocation = FVector(0, 0, BaseEyeHeight); // Position the camera
+	CameraComponent->SetRelativeLocation(FVector(0, 0, BaseEyeHeight)); // Position the camera
 	CameraComponent->bUsePawnControlRotation = true;
 
 	// Create a mesh component that will be used when being viewed from a '1st person' view (when controlling this pawn)
 	Mesh1PComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh"));
 	Mesh1PComponent->SetupAttachment(CameraComponent);
 	Mesh1PComponent->CastShadow = false;
-	Mesh1PComponent->RelativeRotation = FRotator(2.0f, -15.0f, 5.0f);
-	Mesh1PComponent->RelativeLocation = FVector(0, 0, -160.0f);
+	Mesh1PComponent->SetRelativeRotation(FRotator(2.0f, -15.0f, 5.0f));
+	Mesh1PComponent->SetRelativeLocation(FVector(0, 0, -160.0f));
 
 	// Create a gun mesh component
 	GunMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FP_Gun"));
