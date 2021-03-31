@@ -7,6 +7,7 @@
 #include "FPSBlacHole.generated.h"
 
 class USphereComponent;
+class UParticleSystem;
 
 UCLASS()
 class FPSGAME_API AFPSBlacHole : public AActor
@@ -29,6 +30,11 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	USphereComponent* SiphonComp;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	UParticleSystem* DestroyVFX;
+
+	void PlayEffects();
 
 public:	
 	// Called every frame
