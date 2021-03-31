@@ -57,7 +57,7 @@ void AFPSBlacHole::Tick(float DeltaTime)
 	for (FOverlapResult Result : OutOverLapsSiphon) {
 		UPrimitiveComponent* Overlap = Result.GetComponent();
 		if (Overlap && Overlap->IsSimulatingPhysics()) {
-			Overlap->AddRadialForce(GetActorLocation(), SiphonComp->GetScaledSphereRadius(),-5000.0f,ERadialImpulseFalloff::RIF_Constant,true);
+			Overlap->AddRadialForce(GetActorLocation(), SiphonComp->GetScaledSphereRadius(),-2000.0f,ERadialImpulseFalloff::RIF_Constant,true);
 		}
 	}
 	for (FOverlapResult Result : OutOverLapsSphere) {
