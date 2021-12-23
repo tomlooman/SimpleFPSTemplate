@@ -1,6 +1,9 @@
 # Visual Studio 2015 user specific files
 .vs/
 
+# Rider
+.idea/
+
 # Visual Studio 2015 database file
 *.VC.db
 

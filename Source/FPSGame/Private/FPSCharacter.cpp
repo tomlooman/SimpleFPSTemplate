@@ -47,6 +47,39 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 }
 
 
+void AFPSCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+
+	if (IsLocallyControlled())
+	{
+		/* Play landed camera anim */
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		if (PC)
+		{
+			PC->PlayerCameraManager->StartCameraShake(LandedCameraShake);
+		}
+		//UGameplayStatics::PlaySound2D(this, LandedSound);
+	}
+}
+
+void AFPSCharacter::OnJumped_Implementation()
+{
+	Super::OnJumped_Implementation();
+
+	if (IsLocallyControlled())
+	{
+		/* Play jump camera anim */
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		if (PC)
+		{
+			PC->PlayerCameraManager->StartCameraShake(JumpCameraShake);
+		}
+		//UGameplayStatics::PlaySound2D(this, JumpedSound);
+	}
+}
+
+
 void AFPSCharacter::Fire()
 {
 	// try and fire a projectile
@@ -60,6 +93,7 @@ void AFPSCharacter::Fire()
 		//Set Spawn Collision Handling Override
 		FActorSpawnParameters ActorSpawnParams;
 		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+		ActorSpawnParams.Instigator = this;
 
 		// spawn the projectile at the muzzle
 		GetWorld()->SpawnActor<AFPSProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation, ActorSpawnParams);
@@ -81,6 +115,9 @@ void AFPSCharacter::Fire()
 			AnimInstance->PlaySlotAnimationAsDynamicMontage(FireAnimation, "Arms", 0.0f);
 		}
 	}
+
+	// Play Muzzle FX
+	UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, GunMeshComponent, "Muzzle");
 }
 
 
