@@ -34,6 +34,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* CameraComponent;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Camera")
+	TSubclassOf<UCameraShakeBase> LandedCameraShake;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Camera")
+	TSubclassOf<UCameraShakeBase> JumpCameraShake;
+
 public:
 	AFPSCharacter();
 
@@ -51,6 +57,10 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement")
 	UParticleSystem* MuzzleFlash;
+
+	virtual void Landed(const FHitResult& Hit) override;
+
+	virtual void OnJumped_Implementation() override;
 
 protected:
 	

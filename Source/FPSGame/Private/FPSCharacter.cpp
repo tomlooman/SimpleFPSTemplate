@@ -47,6 +47,39 @@ void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 }
 
 
+void AFPSCharacter::Landed(const FHitResult& Hit)
+{
+	Super::Landed(Hit);
+
+	if (IsLocallyControlled())
+	{
+		/* Play landed camera anim */
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		if (PC)
+		{
+			PC->PlayerCameraManager->StartCameraShake(LandedCameraShake);
+		}
+		//UGameplayStatics::PlaySound2D(this, LandedSound);
+	}
+}
+
+void AFPSCharacter::OnJumped_Implementation()
+{
+	Super::OnJumped_Implementation();
+
+	if (IsLocallyControlled())
+	{
+		/* Play jump camera anim */
+		APlayerController* PC = Cast<APlayerController>(GetController());
+		if (PC)
+		{
+			PC->PlayerCameraManager->StartCameraShake(JumpCameraShake);
+		}
+		//UGameplayStatics::PlaySound2D(this, JumpedSound);
+	}
+}
+
+
 void AFPSCharacter::Fire()
 {
 	// try and fire a projectile
