@@ -1,7 +1,7 @@
 # SimpleFPSTemplate
-Simple C++ FPS Template for Unreal Engine 4
+Simple C++ FPS Template for Unreal Engine
 
-*Last updated for 4.25*
+*Last updated for 4.26*
 
 [More Info](https://www.tomlooman.com/fps-template/)
 
@@ -10,4 +10,4 @@ The provided C++ template that ships with the engine has several features that s
 
 ![alt text](https://www.tomlooman.com/wp-content/uploads/2017/09/Thumb_FPSTemplate2.jpg)
 
-This project is licensed under the Unreal Engine 4 EULA.
+This project is licensed under the Unreal Engine EULA.
