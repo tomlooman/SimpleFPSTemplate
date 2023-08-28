@@ -1,6 +1,10 @@
 // Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #include "FPSCharacter.h"
+
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputMappingContext.h"
 #include "FPSProjectile.h"
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
@@ -33,17 +37,21 @@ AFPSCharacter::AFPSCharacter()
 
 void AFPSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	// set up gameplay key bindings
-	check(PlayerInputComponent);
+	UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AFPSCharacter::Fire);
+	EnhancedInputComponent->BindAction(Input_Move, ETriggerEvent::Triggered, this, &AFPSCharacter::MoveInput);
+	EnhancedInputComponent->BindAction(Input_Look, ETriggerEvent::Triggered, this, &AFPSCharacter::LookInput);
 
-	PlayerInputComponent->BindAxis("MoveForward", this, &AFPSCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AFPSCharacter::MoveRight);
+	// Jump exists in the base class, we dont need our own function
+	EnhancedInputComponent->BindAction(Input_Jump, ETriggerEvent::Triggered, this, &ACharacter::Jump);
+	EnhancedInputComponent->BindAction(Input_Fire, ETriggerEvent::Triggered, this, &AFPSCharacter::Fire);
 
-	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
+	const APlayerController* PC = GetController<APlayerController>();
+	const ULocalPlayer* LP = PC->GetLocalPlayer();
+	
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+	// Add mappings for our game, more complex games may have multiple Contexts that are added/removed at runtime
+	Subsystem->AddMappingContext(DefaultInputMapping, 0);
 }
 
 
@@ -55,10 +63,8 @@ void AFPSCharacter::Landed(const FHitResult& Hit)
 	{
 		/* Play landed camera anim */
 		APlayerController* PC = Cast<APlayerController>(GetController());
-		if (PC)
-		{
-			PC->PlayerCameraManager->StartCameraShake(LandedCameraShake);
-		}
+		PC->PlayerCameraManager->StartCameraShake(LandedCameraShake);
+		
 		//UGameplayStatics::PlaySound2D(this, LandedSound);
 	}
 }
@@ -67,14 +73,13 @@ void AFPSCharacter::OnJumped_Implementation()
 {
 	Super::OnJumped_Implementation();
 
+	// Don't play when this code is running for another player's character (multiplayer)
 	if (IsLocallyControlled())
 	{
 		/* Play jump camera anim */
 		APlayerController* PC = Cast<APlayerController>(GetController());
-		if (PC)
-		{
-			PC->PlayerCameraManager->StartCameraShake(JumpCameraShake);
-		}
+		PC->PlayerCameraManager->StartCameraShake(JumpCameraShake);
+		
 		//UGameplayStatics::PlaySound2D(this, JumpedSound);
 	}
 }
@@ -99,43 +104,36 @@ void AFPSCharacter::Fire()
 		GetWorld()->SpawnActor<AFPSProjectile>(ProjectileClass, MuzzleLocation, MuzzleRotation, ActorSpawnParams);
 	}
 
-	// try and play the sound if specified
-	if (FireSound)
+	UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+	
+	// Get the animation object for the arms mesh
+	UAnimInstance* AnimInstance = Mesh1PComponent->GetAnimInstance();
+	if (AnimInstance)
 	{
-		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
-	}
-
-	// try and play a firing animation if specified
-	if (FireAnimation)
-	{
-		// Get the animation object for the arms mesh
-		UAnimInstance* AnimInstance = Mesh1PComponent->GetAnimInstance();
-		if (AnimInstance)
-		{
-			AnimInstance->PlaySlotAnimationAsDynamicMontage(FireAnimation, "Arms", 0.0f);
-		}
+		AnimInstance->PlaySlotAnimationAsDynamicMontage(FireAnimation, "Arms", 0.0f);
 	}
 
 	// Play Muzzle FX
 	UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, GunMeshComponent, "Muzzle");
 }
 
-
-void AFPSCharacter::MoveForward(float Value)
+void AFPSCharacter::MoveInput(const FInputActionValue& InputValue)
 {
-	if (Value != 0.0f)
-	{
-		// add movement in that direction
-		AddMovementInput(GetActorForwardVector(), Value);
-	}
+	// Combined input from forward/back (X) and left/right (Y)
+	FVector2d MoveValue = InputValue.Get<FVector2d>();
+	
+	// add movement in that direction
+	AddMovementInput(GetActorForwardVector(), MoveValue.X);
+
+	// add movement in that direction
+	AddMovementInput(GetActorRightVector(), MoveValue.Y);
 }
 
-
-void AFPSCharacter::MoveRight(float Value)
+void AFPSCharacter::LookInput(const FInputActionValue& InputValue)
 {
-	if (Value != 0.0f)
-	{
-		// add movement in that direction
-		AddMovementInput(GetActorRightVector(), Value);
-	}
+	// Combined input from look up/down (X) and left/right (Y)
+	FVector2d LookValue = InputValue.Get<FVector2d>();
+	
+	AddControllerYawInput(LookValue.X);
+	AddControllerPitchInput(LookValue.Y);
 }

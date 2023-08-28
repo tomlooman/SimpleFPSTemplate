@@ -4,8 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+
+// Included for struct FInputActionInstance (Enhanced Input)
+#include "InputAction.h"
+
 #include "FPSCharacter.generated.h"
 
+class UInputMappingContext;
 class UInputComponent;
 class USkeletalMeshComponent;
 class UCameraComponent;
@@ -21,6 +26,24 @@ class AFPSCharacter : public ACharacter
 	GENERATED_BODY()
 
 protected:
+
+	// -- Enhanced Input -- //
+
+	/* Holds collection of currently active and available InputActions */
+	UPROPERTY(EditDefaultsOnly, Category="Input")
+	UInputMappingContext* DefaultInputMapping;
+
+	UPROPERTY(EditDefaultsOnly, Category= "Input")
+	UInputAction* Input_Move;
+	
+	UPROPERTY(EditDefaultsOnly, Category= "Input")
+	UInputAction* Input_Look;
+	
+	UPROPERTY(EditDefaultsOnly, Category= "Input")
+	UInputAction* Input_Jump;
+	
+	UPROPERTY(EditDefaultsOnly, Category= "Input")
+	UInputAction* Input_Fire;
 
 	/** Pawn mesh: 1st person view  */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Mesh")
@@ -67,12 +90,10 @@ protected:
 	/** Fires a projectile. */
 	void Fire();
 
-	/** Handles moving forward/backward */
-	void MoveForward(float Val);
+	void MoveInput(const FInputActionValue& InputValue);
 
-	/** Handles strafing movement, left and right */
-	void MoveRight(float Val);
-
+	void LookInput(const FInputActionValue& InputValue);
+	
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 
 public:

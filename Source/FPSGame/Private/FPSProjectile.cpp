@@ -53,7 +53,7 @@ void AFPSProjectile::Explode()
 void AFPSProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	// Only add impulse and destroy projectile if we hit a physics object
-	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
+	if ((OtherActor) && (OtherActor != this) && (OtherComp) && OtherComp->IsSimulatingPhysics())
 	{
 		float RandomIntensity = FMath::RandRange(200.0f, 500.0f);
 
@@ -74,9 +74,7 @@ void AFPSProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPr
 		UMaterialInstanceDynamic* MatInst = OtherComp->CreateDynamicMaterialInstance(0);
 		if (MatInst)
 		{
-			FLinearColor NewColor = FLinearColor::MakeRandomColor();
-
-			MatInst->SetVectorParameterValue("Color", NewColor);
+			MatInst->SetVectorParameterValue("Color", FLinearColor::MakeRandomColor());
 		}
 
 		Explode();
